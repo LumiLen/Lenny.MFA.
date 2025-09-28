@@ -25,6 +25,19 @@
     .ratio { position: relative; width: 100%; aspect-ratio: 16 / 9; background:#f6f6f6; border:1px solid #eee; border-radius: 16px; overflow: hidden; }
     video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background:#000; }
 
+    /* Portfolio Button */
+    #portfolioBtn { 
+      display: none; 
+      margin: 24px auto 0; 
+      padding: 14px 20px; 
+      font-weight: 700; 
+      border: none; 
+      border-radius: 999px; 
+      background:#111; 
+      color:#fff; 
+      cursor: pointer;
+    }
+
     /* Reduce motion accessibility */
     @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
   </style>
@@ -50,6 +63,7 @@
           Your browser does not support the video tag.
         </video>
       </div>
+      <button id="portfolioBtn">תיק עבודות והצהרה</button>
     </div>
   </main>
 
@@ -59,6 +73,7 @@
       const gate  = document.getElementById('gate');
       const stage = document.getElementById('stage');
       const vid   = document.getElementById('hero');
+      const portfolioBtn = document.getElementById('portfolioBtn');
 
       function revealAndPlay(){
         btn.disabled = true;
@@ -66,17 +81,13 @@
         stage.style.display = 'block';
         gate.style.display  = 'none';
 
-        // Ensure unmuted and attempt playback on the user gesture
         try { vid.muted = false; vid.volume = 1; } catch(e){}
 
-        // iOS needs a direct play() call within the gesture
         const tryPlay = vid.play();
         if (tryPlay && typeof tryPlay.then === 'function') {
           tryPlay.catch(() => {
-            // If autoplay with sound is blocked, try muted fallback and show a small hint
             vid.muted = true;
             vid.play().then(() => {
-              // Show hint to unmute
               showToast('Audio was blocked. Unmute the video to hear sound.');
             }).catch(() => {
               showToast('Could not start playback. Press play to begin.');
@@ -84,7 +95,17 @@
             });
           });
         }
+
+        // Show portfolio button after 11s
+        setTimeout(() => {
+          portfolioBtn.style.display = 'block';
+        }, 11000);
       }
+
+      portfolioBtn.addEventListener('click', () => {
+        // Replace 'media/portfolio.pdf' with your PDF path
+        window.location.href = 'media/portfolio.pdf';
+      });
 
       function showToast(msg){
         const t = document.createElement('div');
@@ -99,10 +120,8 @@
       }
 
       btn.addEventListener('click', revealAndPlay);
-      // Keyboard activation
       btn.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' '){ revealAndPlay(); } });
     })();
   </script>
 </body>
 </html>
-
