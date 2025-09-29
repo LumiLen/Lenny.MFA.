@@ -1,127 +1,40 @@
 <!doctype html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Landing · Video with Click-to-Enable Audio</title>
-  <meta name="description" content="Minimal white landing page that asks for audio permission, then reveals and auto‑plays a centered video with sound." />
+  <title>עמוד נחיתה · תמונה + הורדת PDF</title>
+  <meta name="description" content="עמוד נחיתה מינימלי (רקע לבן) עם תמונה במרכז וכפתור הורדת PDF מתחת." />
   <style>
     :root { --ink:#111; --sub:#555; }
     html, body { height: 100%; }
     body { margin: 0; background:#fff; color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
 
-    /* Fullscreen consent layer */
-    .gate { position: fixed; inset: 0; display: grid; place-items: center; background:#fff; }
-    .card { width: min(520px, 92vw); border:1px solid #eee; border-radius: 16px; padding: 28px; box-shadow: 0 6px 24px rgba(0,0,0,.06); text-align: center; }
-    .title { font-size: 1.25rem; font-weight: 700; margin: 0 0 6px; }
-    .note { margin: 0 0 18px; color: var(--sub); font-size: .95rem; }
-    .btn { appearance: none; border: none; border-radius: 999px; padding: 14px 20px; font-weight: 700; cursor: pointer; background:#111; color:#fff; width: 100%; }
+    /* Stage */
+    .stage { min-height: 100svh; display: grid; place-items: center; padding: clamp(16px, 4vw, 40px); box-sizing: border-box; }
+    .wrap { width: min(980px, 92vw); text-align: center; }
+
+    /* Image */
+    .hero { width: 100%; height: auto; display: block; margin: 0 auto; background:#f6f6f6; border:1px solid #eee; border-radius: 16px; box-shadow: 0 6px 24px rgba(0,0,0,.06); }
+
+    /* Button */
+    .btn { display:inline-block; margin-top: 20px; padding: 14px 22px; font-weight: 700; border: none; border-radius: 999px; background:#111; color:#fff; text-decoration: none; cursor: pointer; }
     .btn:focus-visible { outline: 3px solid #0a7; outline-offset: 3px; }
-    .btn[disabled] { opacity:.6; cursor: progress; }
 
-    /* Video stage */
-    .stage { display: none; min-height: 100svh; padding: clamp(16px, 4vw, 40px); box-sizing: border-box; }
-    .wrap { max-width: 960px; margin: 0 auto; }
-    .ratio { position: relative; width: 100%; aspect-ratio: 16 / 9; background:#f6f6f6; border:1px solid #eee; border-radius: 16px; overflow: hidden; }
-    video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background:#000; }
-
-    /* Portfolio Button */
-    #portfolioBtn { 
-      display: none; 
-      margin: 24px auto 0; 
-      padding: 14px 20px; 
-      font-weight: 700; 
-      border: none; 
-      border-radius: 999px; 
-      background:#111; 
-      color:#fff; 
-      cursor: pointer;
-    }
-
-    /* Reduce motion accessibility */
     @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
   </style>
 </head>
 <body>
-
-  <!-- Consent Gate -->
-  <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-desc">
-    <div class="card">
-      <p class="title" id="gate-title">Enable audio to continue</p>
-      <p class="note" id="gate-desc">This page contains a video with sound. Click the button below to allow audio playback.</p>
-      <button id="enter" class="btn" type="button">Tap to enable sound & start</button>
-    </div>
-  </div>
-
-  <!-- Video Stage -->
-  <main class="stage" id="stage" aria-live="polite">
+  <main class="stage" aria-live="polite">
     <div class="wrap">
-      <div class="ratio">
-        <!-- Replace the src with your video. Recommended: MP4 (H.264). -->
-        <video id="hero" playsinline preload="none" controls poster="" aria-label="Intro video">
-          <source src="media/vidhi.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-      <button id="portfolioBtn">תיק עבודות והצהרה</button>
+      <!-- החליפי את הנתיב לתמונה שלך -->
+      <img class="hero" src="media/cover.jpg" alt="לני פילר – תמונת שער" />
+      <!-- כפתור שמוריד את ה‑PDF -->
+      <!-- החליפי את הנתיב לקובץ ה‑PDF שלך -->
+      <a class="btn" href="media/portfolio.pdf" download>
+        תיק עבודות והצהרה
+      </a>
     </div>
   </main>
-
-  <script>
-    (function(){
-      const btn   = document.getElementById('enter');
-      const gate  = document.getElementById('gate');
-      const stage = document.getElementById('stage');
-      const vid   = document.getElementById('hero');
-      const portfolioBtn = document.getElementById('portfolioBtn');
-
-      function revealAndPlay(){
-        btn.disabled = true;
-        // Show stage, hide gate
-        stage.style.display = 'block';
-        gate.style.display  = 'none';
-
-        try { vid.muted = false; vid.volume = 1; } catch(e){}
-
-        const tryPlay = vid.play();
-        if (tryPlay && typeof tryPlay.then === 'function') {
-          tryPlay.catch(() => {
-            vid.muted = true;
-            vid.play().then(() => {
-              showToast('Audio was blocked. Unmute the video to hear sound.');
-            }).catch(() => {
-              showToast('Could not start playback. Press play to begin.');
-              btn.disabled = false;
-            });
-          });
-        }
-
-        // Show portfolio button after 11s
-        setTimeout(() => {
-          portfolioBtn.style.display = 'block';
-        }, 11000);
-      }
-
-      portfolioBtn.addEventListener('click', () => {
-        // Replace 'media/portfolio.pdf' with your PDF path
-        window.location.href = 'media/portfolio.pdf';
-      });
-
-      function showToast(msg){
-        const t = document.createElement('div');
-        t.textContent = msg;
-        Object.assign(t.style,{
-          position:'fixed',left:'50%',bottom:'24px',transform:'translateX(-50%)',
-          background:'#111',color:'#fff',padding:'10px 14px',borderRadius:'999px',
-          fontSize:'14px',boxShadow:'0 6px 20px rgba(0,0,0,.18)',zIndex: 9999
-        });
-        document.body.appendChild(t);
-        setTimeout(()=>{ t.remove(); }, 4200);
-      }
-
-      btn.addEventListener('click', revealAndPlay);
-      btn.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' '){ revealAndPlay(); } });
-    })();
-  </script>
 </body>
 </html>
